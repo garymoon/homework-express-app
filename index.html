@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Homework</title>
+</head>
+
+<body>
+    <label for="method-select">Select a method:</label>
+
+    <select name="methods" id="method-select">
+        <option selected value="GET">GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+    </select>
+
+    <br />
+
+    <label for="route-select">Select a route:</label>
+
+    <select name="routes" id="route-select">
+        <option selected value="/a">/a</option>
+        <option value="/b">/b</option>
+    </select>
+
+    <br />
+
+    <input id="btn-request" type="button" value="Make Request" />
+
+    <div id="status"></div>
+
+    <script type="text/javascript">
+        addEventListener("load", (event) => {
+            document.getElementById('btn-request').addEventListener('click', fetchData);
+        });
+
+        function showStatus(statusMessage, isError) {
+            const statusElement = document.getElementById("status");
+            statusElement.innerText = statusMessage;
+            statusElement.style.color = isError ? "DarkRed" : "ForestGreen";
+        }
+
+        async function fetchData() {
+            const selectedMethod = document.getElementById("method-select").value;
+            const selectedRoute = document.getElementById("route-select").value;
+            try {
+                const response = await fetch(selectedRoute, {
+                    method: selectedMethod,
+                });
+
+                if (response.ok) {
+                    showStatus(`Request was successful with status '${response.status}'`);
+                } else {
+                    showStatus(`Request was unsuccessful with status '${response.status}'`, true);
+                }
+            } catch (error) {
+                showStatus(`Request failed with error '${error}'`, true);
+            }
+        }
+    </script>
+</body>
+
+</html>
