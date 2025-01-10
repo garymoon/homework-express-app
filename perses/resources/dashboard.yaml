@@ -1,0 +1,128 @@
+# Stolen from https://github.com/jochen-schweizer/express-prom-bundle/issues/40, and converted:
+# docker exec -it -u root perses percli login http://127.0.0.1:8080/
+# docker exec -it -u root perses percli migrate --file=[path-to-json-file] --online
+
+kind: Dashboard
+metadata:
+    name: default
+    createdAt: 0001-01-01T00:00:00Z
+    updatedAt: 0001-01-01T00:00:00Z
+    version: 0
+    project: default
+spec:
+    display:
+        name: Express Application
+    variables:
+        - kind: ListVariable
+          spec:
+            display:
+                name: Service
+                hidden: false
+            allowAllValue: true
+            allowMultiple: false
+            sort: alphabetical-asc
+            plugin:
+                kind: PrometheusLabelValuesVariable
+                spec:
+                    labelName: service
+                    matchers:
+                        - http_request_duration_seconds_count
+            name: service
+    panels:
+        "0":
+            kind: Panel
+            spec:
+                display:
+                    name: Response Codes per Minute
+                plugin:
+                    kind: TimeSeriesChart
+                    spec: {}
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: sum by (status_code)(rate(http_request_duration_seconds_count{service="$service"}[1m]))
+                                seriesNameFormat: HTTP {{status_code}}
+        "1":
+            kind: Panel
+            spec:
+                display:
+                    name: Average Response Time
+                plugin:
+                    kind: TimeSeriesChart
+                    spec: {}
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: |-
+                                    sum(rate(http_request_duration_seconds_sum{service="$service"}[5m])) by (status_code) /
+                                    sum(rate(http_request_duration_seconds_count{service="$service"}[5m])) by (status_code)
+                                seriesNameFormat: HTTP {{status_code}}
+        "2":
+            kind: Panel
+            spec:
+                display:
+                    name: Requests Per Minute
+                plugin:
+                    kind: TimeSeriesChart
+                    spec: {}
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: sum by (method, path)(rate(http_request_duration_seconds_count{service="$service"}[1m]))
+                                seriesNameFormat: '{{method}} {{path}}'
+        "3":
+            kind: Panel
+            spec:
+                display:
+                    name: Response Time
+                plugin:
+                    kind: TimeSeriesChart
+                    spec: {}
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: |-
+                                    sum(rate(http_request_duration_seconds_sum{service="$service"}[5m])) by (method, path) /
+                                    sum(rate(http_request_duration_seconds_count{service="$service"}[5m])) by (method, path)
+                                seriesNameFormat: '{{method}} {{path}}'
+    layouts:
+        - kind: Grid
+          spec:
+            items:
+                - x: 0
+                  "y": 0
+                  width: 12
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/0'
+                - x: 12
+                  "y": 0
+                  width: 12
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/1'
+                - x: 0
+                  "y": 8
+                  width: 12
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/2'
+                - x: 12
+                  "y": 8
+                  width: 12
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/3'
+    duration: 1h

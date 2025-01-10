@@ -3,8 +3,11 @@
 const path = require('path');
 
 const express = require('express');
+const promBundle = require("express-prom-bundle");
 
 const app = express();
+
+app.use(promBundle({includeMethod: true}));
 
 // Serve the index file if no document is requested
 app.get('/', function (req, res) {

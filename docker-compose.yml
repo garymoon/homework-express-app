@@ -1,0 +1,35 @@
+services:
+
+    homework-express-app:
+        build: .
+        container_name: homework-express-app
+        restart: unless-stopped
+        ports:
+            - 3000:3000
+        healthcheck:
+            disable: true
+
+    perses:
+        image: persesdev/perses:v0.50
+        container_name: perses
+        command: "--config=/etc/perses/config/config.yaml"
+        restart: unless-stopped
+        ports:
+            - 3001:8080
+        volumes:
+            - ./perses/config.yaml:/etc/perses/config/config.yaml
+            - ./perses/resources:/etc/perses/resources/
+        healthcheck:
+            disable: true
+
+    prometheus:
+        image: prom/prometheus:latest
+        container_name: prometheus
+        command:
+            - --config.file=/etc/prometheus.yaml
+        volumes:
+            - ./prometheus.yaml:/etc/prometheus.yaml
+        ports:
+            - "3002:9090"
+        healthcheck:
+            disable: true
