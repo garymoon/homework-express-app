@@ -18,3 +18,11 @@ An express application and supporting resources to meet the requirements in [TOD
 - [x] Create a GitHub Action to build, test, and deploy
   - See [test-build-push.yml](./.github/workflows/test-build-push.yml)
   - I substituted deployment for pushing to the GCR since the full stack still runs fine locally (thanks Perses!)
+
+## How To Run
+
+- To start: `docker compose up --build`
+- The Node app will be available [here](http://127.0.0.1:3000), on port 3000
+- The Prometheus instance will be available [here](http://127.0.0.1:3001), on port 3001
+- The Perses instance will be available [here](http://127.0.0.1:3002), on port 3002
+- To stop: `docker compose down -v`
